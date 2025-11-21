@@ -1,0 +1,79 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+const NavbarAuth = () => {
+  const { user, logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout();
+      window.location.href = '/';
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/events?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
+
+  const isAdmin = user?.role === 'ROLE_ADMIN';
+
+  return (
+    <nav className="navbar">
+      <div className="nav-container">
+        <div className="nav-logo">
+          <Link to="/">
+            <div className="logo-text">
+              <h1>BookEasy</h1>
+              <p className="tagline">Just book it — we've got you covered</p>
+            </div>
+          </Link>
+        </div>
+
+        <div className="nav-search">
+          <form onSubmit={handleSearch} className="search-form">
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <button type="submit" className="search-btn">
+              🔍
+            </button>
+          </form>
+        </div>
+
+        <div className="nav-links">
+          <Link to="/">Events</Link>
+          
+          {isAdmin ? (
+            <>
+              <Link to="/admin/events">Manage Events</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/profile">Profile</Link>
+              <Link to="/bookings">My Bookings</Link>
+            </>
+          )}
+          
+          <span className="user-welcome">
+            Hello, {user?.firstName || user?.username}
+            {isAdmin && <span className="admin-badge"> (Organizer)</span>}
+          </span>
+          <button onClick={handleLogout} className="logout-btn">Logout</button>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default NavbarAuth;
