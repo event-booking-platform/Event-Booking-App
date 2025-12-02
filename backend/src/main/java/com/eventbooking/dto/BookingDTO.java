@@ -14,7 +14,6 @@ public class BookingDTO {
     private UserDTO user;
     private EventDTO event;
 
-    // Constructors
     public BookingDTO() {}
 
     public BookingDTO(Long id, Integer ticketCount, BigDecimal totalAmount,
@@ -30,7 +29,6 @@ public class BookingDTO {
         this.event = event;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

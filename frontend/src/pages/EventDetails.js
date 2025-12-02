@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getEventById, reserveTickets } from '../services/api';
+import { getEventImageWithFallback } from '../utils/eventImages';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -35,7 +36,6 @@ const EventDetails = () => {
       return;
     }
 
-    // Check if user is admin
     if (user?.role === 'ROLE_ADMIN') {
       alert('Organizers cannot book events. Please use a regular user account.');
       return;
@@ -45,14 +45,33 @@ const EventDetails = () => {
     setError('');
 
     try {
+      console.log(' Starting reservation process...');
+      console.log(' User token:', token ? 'Present' : 'Missing');
+      console.log(' User role:', user?.role);
+      
       const response = await reserveTickets({
         eventId: event.id,
         ticketCount: ticketCount
       });
       
-      navigate(`/reservation/${response.data.reservationId}`);
+      console.log(' Reservation response:', response);
+      
+      const reservationId = response.data.id || response.data.reservationId;
+      
+      if (reservationId) {
+        console.log(' Reservation created with ID:', reservationId);
+        navigate(`/reservation/${reservationId}`);
+      } else {
+        throw new Error('Reservation ID not received in response');
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'Reservation failed');
+      console.error(' Reservation error:', error);
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Reservation failed';
+      setError(errorMessage);
+      alert(`Reservation failed: ${errorMessage}`);
     } finally {
       setReservationLoading(false);
     }
@@ -76,11 +95,17 @@ const EventDetails = () => {
           <div className="event-info">
             <div className="event-image">
               <img 
-                src={`https://picsum.photos/600/400?random=${event.id}`} 
-                alt={event.title} 
+                src={getEventImageWithFallback(event, 600, 400).src} 
+                alt={event.title}
+                onError={(e) => {
+                  const { fallback, placeholder } = getEventImageWithFallback(event, 600, 400);
+                  e.target.src = fallback;
+                  e.target.onerror = () => {
+                    e.target.src = placeholder;
+                  };
+                }}
               />
             </div>
-            
             <div className="event-details">
               <h3>Event Details</h3>
               <div className="detail-item">
@@ -111,8 +136,8 @@ const EventDetails = () => {
               <h3>Reserve Tickets</h3>
               {isAdmin ? (
                 <div className="admin-message">
-                  <p>📋 <strong>Organizer View</strong></p>
-                  <p>As an organizer, you can manage events but cannot book tickets.</p>
+                  <p>📋 <strong>Admin View</strong></p>
+                  <p>As an Admin, you can manage events but cannot book tickets.</p>
                   <Link to="/admin/events" className="manage-events-btn">
                     Manage Events
                   </Link>

@@ -20,10 +20,14 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public User registerUser(User user) {
-        return registerUser(user, UserRole.ROLE_USER); // Default to USER role
+        return registerUser(user, UserRole.ROLE_USER);
     }
 
     public User registerUser(User user, UserRole role) {
+        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
+            throw new RuntimeException("First name is required");
+        }
+
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("Username already exists");
         }

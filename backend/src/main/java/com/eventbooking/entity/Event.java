@@ -14,6 +14,9 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Version
+    private Long version;
 
     @NotNull
     private String title;
@@ -102,4 +105,7 @@ public class Event {
 
     public List<Booking> getBookings() { return bookings; }
     public void setBookings(List<Booking> bookings) { this.bookings=bookings;}
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

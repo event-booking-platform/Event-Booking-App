@@ -31,8 +31,8 @@ const AdminRegister = () => {
 
     try {
         const response = await registerAdmin(formData);
-        alert('Organizer registration successful! Please login with your credentials.');
-        navigate('/login'); 
+        alert('Admin registration successful! Please login with your credentials.');
+        navigate('/login');
     } catch (error) {
         setError(error.response?.data?.message || 'Admin registration failed');
     } finally {
@@ -43,7 +43,7 @@ const AdminRegister = () => {
   return (
     <div className="register-page">
       <div className="register-container">
-        <h2>Register as Organizer</h2>
+        <h2>Register as Admin</h2>
         <form onSubmit={handleSubmit} className="register-form">
           {error && <div className="error-message">{error}</div>}
           
@@ -114,7 +114,7 @@ const AdminRegister = () => {
           </div>
 
           <button type="submit" disabled={loading} className="admin-register-btn">
-            {loading ? 'Creating Organizer Account...' : 'Register as Organizer'}
+            {loading ? 'Creating Admin Account...' : 'Register as Admin'}
           </button>
 
           <p className="login-link">

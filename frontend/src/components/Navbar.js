@@ -1,48 +1,66 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import './Navbar.css';
 
 const Navbar = () => {
-  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/events?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-    }
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen); 
+  };
+
+  const handleNavClick = () => {
+    setIsMobileMenuOpen(false); 
   };
 
   return (
     <nav className="navbar">
       <div className="nav-container">
+        {}
         <div className="nav-logo">
-          <Link to="/">
+          <a href="/" onClick={handleNavClick}>
             <div className="logo-text">
               <h1>BookEasy</h1>
               <p className="tagline">Just book it — we've got you covered</p>
             </div>
-          </Link>
+          </a>
         </div>
-        
+
+        {}
         <div className="nav-search">
-          <form onSubmit={handleSearch} className="search-form">
-            <input
-              type="text"
-              placeholder="Search events..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
+          <form className="search-form" onSubmit={(e) => {
+            e.preventDefault();
+            const searchInput = e.target.querySelector('.search-input');
+            if (searchInput.value.trim()) {
+              navigate(`/events?search=${encodeURIComponent(searchInput.value)}`);
+              setIsMobileMenuOpen(false);
+            }
+          }}>
+            <input 
+              type="text" 
+              className="search-input" 
+              placeholder="Search events..." 
             />
-            <button type="submit" className="search-btn">
-              🔍
-            </button>
+            <button type="submit" className="search-btn">Search</button>
           </form>
         </div>
 
-        <div className="nav-links">
-          <Link to="/">Home</Link>
-          <Link to="/login">Login</Link>
+        {}
+        <div 
+          className={`mobile-menu-btn ${isMobileMenuOpen ? 'active' : ''}`}
+          onClick={toggleMobileMenu}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        {}
+        <div className={`nav-links ${isMobileMenuOpen ? 'nav-links-mobile' : ''}`}>
+          <a href="/" onClick={handleNavClick}>Home</a>
+          <a href="/login" onClick={handleNavClick}>Login</a>
+          <a href="/register" onClick={handleNavClick}>Register</a>
         </div>
       </div>
     </nav>

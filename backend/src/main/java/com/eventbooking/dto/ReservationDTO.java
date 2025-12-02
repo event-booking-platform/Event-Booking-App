@@ -1,14 +1,14 @@
 package com.eventbooking.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class ReservationDTO {
     private Long reservationId;
     private String bookingReference;
     private Integer ticketCount;
     private BigDecimal totalAmount;
-    private LocalDateTime reservationExpiry;
+    private Instant reservationExpiry;
     private EventDTO event;
     private Integer secondsRemaining;
 
@@ -16,7 +16,7 @@ public class ReservationDTO {
     public ReservationDTO() {}
 
     public ReservationDTO(Long reservationId, String bookingReference, Integer ticketCount, 
-                         BigDecimal totalAmount, LocalDateTime reservationExpiry, EventDTO event) {
+                         BigDecimal totalAmount, Instant reservationExpiry, EventDTO event) {
         this.reservationId = reservationId;
         this.bookingReference = bookingReference;
         this.ticketCount = ticketCount;
@@ -38,8 +38,8 @@ public class ReservationDTO {
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
-    public LocalDateTime getReservationExpiry() { return reservationExpiry; }
-    public void setReservationExpiry(LocalDateTime reservationExpiry) { this.reservationExpiry = reservationExpiry; }
+    public Instant getReservationExpiry() { return reservationExpiry; }
+    public void setReservationExpiry(Instant reservationExpiry) { this.reservationExpiry = reservationExpiry; }
 
     public EventDTO getEvent() { return event; }
     public void setEvent(EventDTO event) { this.event = event; }

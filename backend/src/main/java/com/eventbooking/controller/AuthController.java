@@ -76,36 +76,4 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/login/admin")
-    public ResponseEntity<?> authenticateAdmin(@Valid @RequestBody LoginRequest loginRequest) {
-        try {
-            // Authenticate the user
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
-                            loginRequest.getPassword()));
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Fetch user from database
-            User user = userService.findByUsername(loginRequest.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            // Verify user has ROLE_ADMIN
-            if (user.getRole() != UserRole.ROLE_ADMIN) {
-                return ResponseEntity.status(403).body("Access denied. Admin privileges required.");
-            }
-
-            // Generate JWT token
-            String jwt = jwtUtil.generateToken(user.getUsername());
-
-            // Return AuthResponse with admin information
-            return ResponseEntity
-                    .ok(new AuthResponse(jwt, user.getId(), user.getUsername(), user.getEmail(), user.getRole()));
-        } catch (org.springframework.security.core.AuthenticationException e) {
-            return ResponseEntity.status(401).body("Invalid username or password");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 }

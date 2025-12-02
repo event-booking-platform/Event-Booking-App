@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginUser } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -12,6 +13,8 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+
+  const from = location.state?.from?.pathname || '/';
 
   const handleChange = (e) => {
     setFormData({
@@ -26,13 +29,18 @@ const Login = () => {
     setError('');
 
     try {
+      console.log(' Attempting login...');
       const response = await loginUser(formData);
+      console.log(' Login response:', response.data);
+      
       const { token, userId, username, email, role } = response.data;
       
       login({ userId, username, email, role }, token);
-      navigate('/'); 
+      console.log(' Login successful, redirecting to:', from);
+      navigate(from, { replace: true });
     } catch (error) {
-      setError(error.response?.data?.message || 'Login failed');
+      console.error(' Login error:', error);
+      setError(error.response?.data?.message || error.response?.data || 'Login failed');
     } finally {
       setLoading(false);
     }

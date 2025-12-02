@@ -15,19 +15,21 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Username is required")
     @Column(unique = true)
     private String username;
 
-    @NotBlank
+    @NotBlank(message = "Email is required")
     @Email
     @Column(unique = true)
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Password is required")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @NotBlank(message = "First name is required") 
+    @Column(name = "first_name", nullable = false)
     private String firstName;
     private String lastName;
     private String phoneNumber;
@@ -40,7 +42,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore // Prevents infinite recursion
+    @JsonIgnore
     private List<Booking> bookings;
 
     @PrePersist

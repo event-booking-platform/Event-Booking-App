@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllEvents } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { getEventImageWithFallback } from '../utils/eventImages';
 
 const Home = () => {
   const [events, setEvents] = useState([]);
@@ -31,11 +32,21 @@ const Home = () => {
           {events.map(event => (
             <div key={event.id} className="event-card">
               <div className="event-image">
-                <img src={`https://picsum.photos/300/200?random=${event.id}`} alt={event.title} />
+                <img 
+                  src={getEventImageWithFallback(event).src} 
+                  alt={event.title}
+                  onError={(e) => {
+                    const { fallback, placeholder } = getEventImageWithFallback(event);
+                    e.target.src = fallback;
+                    e.target.onerror = () => {
+                      e.target.src = placeholder;
+                    };
+                  }}
+                />
               </div>
               <div className="event-content">
                 <h5>{event.title}</h5>
-                <p className="event-date">📅 {event.eventDate}</p>
+                <p className="event-date"> {event.eventDate}</p>
                 <button onClick={() => navigate(`/event/${event.id}`)}>
                   View Details
                 </button>

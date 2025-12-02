@@ -1673,3 +1673,57 @@ body {
   font-size: 0.85rem;
   margin-bottom: 10px;
 }
+
+.cancel-booking-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.cancel-booking-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.cancel-booking-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.booking-status-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cancellation-info {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
+
+.cancellation-info p {
+  margin: 0;
+  color: #856404;
+  font-size: 0.9rem;
+}
+
+.cancelled-notice {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
+
+.cancelled-notice p {
+  margin: 0;
+  color: #721c24;
+  font-weight: bold;
+}

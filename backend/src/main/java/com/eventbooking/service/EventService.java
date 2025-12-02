@@ -47,7 +47,6 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found with id: " + eventId));
 
-        // Update only provided fields
         if (updateEventDTO.getTitle() != null) {
             event.setTitle(updateEventDTO.getTitle());
         }
@@ -76,10 +75,6 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    /**
-     * @param eventId
-     * @throws RuntimeException
-     */
     public void deleteEvent(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found with id: " + eventId));

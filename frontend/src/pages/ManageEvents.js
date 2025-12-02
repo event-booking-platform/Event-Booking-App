@@ -130,7 +130,7 @@ const ManageEvents = () => {
           </button>
         </div>
 
-        {/* Create/Edit Event Form */}
+        {}
         {(showCreateForm || editingEvent) && (
           <div className="event-form-modal">
             <div className="event-form-container">
@@ -255,7 +255,7 @@ const ManageEvents = () => {
           </div>
         )}
 
-        {/* Events List */}
+        {}
         <div className="events-list">
           {events.length === 0 ? (
             <div className="no-events">

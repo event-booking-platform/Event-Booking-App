@@ -1,20 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { confirmReservation, cancelReservation, getReservation } from '../services/api';
 
 const Reservation = () => {
   const { reservationId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(300); 
+  const [timeLeft, setTimeLeft] = useState(300);
+
+  const fetchReservation = useCallback(async () => {
+    try {
+      const response = await getReservation(reservationId);
+      setReservation(response.data);
+      
+      if (response.data.reservationExpiry) {
+        const expiryTime = new Date(response.data.reservationExpiry).getTime();
+        const currentTime = new Date().getTime();
+        const remainingSeconds = Math.max(0, Math.floor((expiryTime - currentTime) / 1000));
+        setTimeLeft(remainingSeconds);
+      } else {
+        setTimeLeft(response.data.secondsRemaining || 300);
+      }
+    } catch (error) {
+      console.error('Error fetching reservation:', error);
+      alert('Reservation not found or expired');
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  }, [reservationId, navigate]);
+
+  const handleAutoCancel = useCallback(() => {
+    alert('Reservation time has expired. Tickets have been released.');
+    navigate('/');
+  }, [navigate]);
 
   useEffect(() => {
     fetchReservation();
-  }, [reservationId]);
+  }, [fetchReservation]);
 
   useEffect(() => {
     if (!reservation) return;
@@ -31,21 +56,7 @@ const Reservation = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [reservation]);
-
-  const fetchReservation = async () => {
-    try {
-      const response = await getReservation(reservationId);
-      setReservation(response.data);
-      setTimeLeft(response.data.secondsRemaining);
-    } catch (error) {
-      console.error('Error fetching reservation:', error);
-      alert('Reservation not found or expired');
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [reservation, handleAutoCancel]);
 
   const handleConfirm = async () => {
     setProcessing(true);
@@ -54,7 +65,7 @@ const Reservation = () => {
       alert('Booking confirmed successfully!');
       navigate('/bookings');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to confirm booking');
+      alert(error.response?.data?.message || error.response?.data?.error || 'Failed to confirm booking');
     } finally {
       setProcessing(false);
     }
@@ -68,16 +79,11 @@ const Reservation = () => {
         alert('Reservation cancelled');
         navigate('/');
       } catch (error) {
-        alert(error.response?.data?.message || 'Failed to cancel reservation');
+        alert(error.response?.data?.message || error.response?.data?.error || 'Failed to cancel reservation');
       } finally {
         setProcessing(false);
       }
     }
-  };
-
-  const handleAutoCancel = () => {
-    alert('Reservation time has expired. Tickets have been released.');
-    navigate('/');
   };
 
   const formatTime = (seconds) => {

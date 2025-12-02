@@ -3,6 +3,7 @@ package com.eventbooking.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,7 +38,7 @@ public class Booking {
     private String bookingReference;
 
     @Column(name = "reservation_expiry")
-    private LocalDateTime reservationExpiry;
+    private Instant reservationExpiry;
 
     @Column(name = "is_reserved")
     private Boolean isReserved = false;
@@ -45,20 +46,28 @@ public class Booking {
     @PrePersist
     protected void onCreate() {
         bookingDate = LocalDateTime.now();
-        if (status == null) {
-            status = BookingStatus.CONFIRMED;
+
+        if (!Boolean.TRUE.equals(isReserved)) {
+            if (status == null) {
+                status = BookingStatus.CONFIRMED;
+            }
+        } else {
+            status = BookingStatus.PENDING;
         }
+
         if (bookingReference == null) {
             bookingReference = "BK" + System.currentTimeMillis();
         }
 
-        // Calculate total amount
-        if (event != null && ticketCount != null) {
+        if (totalAmount == null && event != null && ticketCount != null) {
             this.totalAmount = event.getTicketPrice().multiply(BigDecimal.valueOf(ticketCount));
+        }
+
+        if (Boolean.TRUE.equals(isReserved) && reservationExpiry == null) {
+            reservationExpiry = Instant.now().plusSeconds(300);
         }
     }
 
-    // Constructors
     public Booking() {
     }
 
@@ -69,7 +78,7 @@ public class Booking {
         this.totalAmount = event.getTicketPrice().multiply(BigDecimal.valueOf(ticketCount));
         this.status = BookingStatus.PENDING;
         this.isReserved = true;
-        this.reservationExpiry = LocalDateTime.now().plusMinutes(5); // 5-minute reservation
+        this.reservationExpiry = Instant.now().plusSeconds(300);
     }
 
     // Getters and Setters
@@ -137,11 +146,11 @@ public class Booking {
         this.bookingReference = bookingReference;
     }
 
-    public LocalDateTime getReservationExpiry() {
+    public Instant getReservationExpiry() {
         return reservationExpiry;
     }
 
-    public void setReservationExpiry(LocalDateTime reservationExpiry) {
+    public void setReservationExpiry(Instant reservationExpiry) {
         this.reservationExpiry = reservationExpiry;
     }
 
@@ -154,6 +163,6 @@ public class Booking {
     }
 
     public boolean isReservationExpired() {
-        return isReserved && reservationExpiry != null && LocalDateTime.now().isAfter(reservationExpiry);
+        return isReserved && reservationExpiry != null && Instant.now().isAfter(reservationExpiry);
     }
 }

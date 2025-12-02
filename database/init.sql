@@ -4,7 +4,7 @@ CREATE DATABASE event_booking;
 -- Connect to the database
 \c event_booking;
 
--- Create tables (UPDATED to match Java entities)
+-- Create tables 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -21,8 +21,8 @@ CREATE TABLE events (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    event_date DATE NOT NULL,
-    event_time TIME NOT NULL,
+    event_date DATE NOT NULL,           
+    event_time TIME NOT NULL,           
     venue VARCHAR(255) NOT NULL,
     ticket_price DECIMAL(10,2) NOT NULL,
     available_tickets INTEGER NOT NULL,
@@ -41,7 +41,6 @@ CREATE TABLE bookings (
     booking_reference VARCHAR(50) UNIQUE
 );
 
--- Insert sample data with proper DATE and TIME separation
 INSERT INTO events (title, description, event_date, event_time, venue, ticket_price, available_tickets, category) VALUES
 ('Avengers: Endgame', 'The epic conclusion to the Avengers saga', '2024-02-15', '19:00:00', 'IMAX Theater', 15.99, 100, 'MOVIE'),
 ('Coldplay Concert', 'Music of the Spheres World Tour', '2024-03-20', '20:00:00', 'National Stadium', 89.99, 5000, 'CONCERT'),
@@ -55,11 +54,16 @@ CREATE INDEX idx_bookings_user_id ON bookings(user_id);
 CREATE INDEX idx_bookings_event_id ON bookings(event_id);
 
 
-
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO event_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO event_user;
 GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO event_user;
 
--- Grant permissions for future tables
+
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO event_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO event_user;
+
+ALTER TABLE bookings 
+ADD COLUMN reservation_expiry TIMESTAMP,
+ADD COLUMN is_reserved BOOLEAN DEFAULT false;
+
+UPDATE bookings SET is_reserved = false WHERE is_reserved IS NULL;

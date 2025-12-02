@@ -33,9 +33,8 @@ const Register = () => {
 
     try {
       const response = await registerUser(formData);
-      // Remove the auto-login and redirect to login page
       alert('Registration successful! Please login with your credentials.');
-      navigate('/login'); // Redirect to login page
+      navigate('/login'); 
     } catch (error) {
       setError(error.response?.data?.message || 'Registration failed');
     } finally {
@@ -134,7 +133,7 @@ const Register = () => {
           </p>
         </form>
 
-        {/* Admin Code */}
+        {}
         {showAdminCode ? (
           <div className="admin-code-section">
             <h4>Organizer Registration</h4>

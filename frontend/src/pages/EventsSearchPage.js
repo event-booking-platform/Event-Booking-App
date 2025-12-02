@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getAllEvents } from '../services/api';
+import { getEventImageWithFallback } from '../utils/eventImages';
 
 const EventsSearchPage = () => {
   const [events, setEvents] = useState([]);
@@ -9,7 +10,6 @@ const EventsSearchPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get search query from URL
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search') || '';
 
@@ -71,13 +71,23 @@ const EventsSearchPage = () => {
             {filteredEvents.map(event => (
               <div key={event.id} className="event-card">
                 <div className="event-image">
-                  <img src={`https://picsum.photos/300/200?random=${event.id}`} alt={event.title} />
+                  <img 
+                    src={getEventImageWithFallback(event).src} 
+                    alt={event.title}
+                    onError={(e) => {
+                      const { fallback, placeholder } = getEventImageWithFallback(event);
+                      e.target.src = fallback;
+                      e.target.onerror = () => {
+                        e.target.src = placeholder;
+                      };
+                    }}
+                  />
                 </div>
                 <div className="event-content">
                   <h5>{event.title}</h5>
                   <p className="event-category">{event.category}</p>
-                  <p className="event-date">📅 {event.eventDate}</p>
-                  <p className="event-venue">📍 {event.venue}</p>
+                  <p className="event-date"> {event.eventDate}</p>
+                  <p className="event-venue"> {event.venue}</p>
                   <button onClick={() => navigate(`/event/${event.id}`)}>
                     View Details
                   </button>

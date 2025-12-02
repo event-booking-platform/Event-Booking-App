@@ -23,11 +23,9 @@ public class UserController {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
 
-            // Get user from username
             User user = userService.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Get actual user profile from database
             UserDTO userDTO = userService.getUserProfile(user.getId());
 
             return ResponseEntity.ok(userDTO);

@@ -1,4 +1,3 @@
-//This DTO carries only the fields that are allowed to be updated.
 package com.eventbooking.dto;
 
 import java.math.BigDecimal;

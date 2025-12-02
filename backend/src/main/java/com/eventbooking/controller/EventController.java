@@ -42,16 +42,8 @@ public class EventController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {
-        // Only admins can create events
         Event createdEvent = eventService.createEvent(event);
         return ResponseEntity.ok(createdEvent);
     }
 
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<EventDTO>> getEventsByCategory(@PathVariable String category) {
-        List<EventDTO> events = eventService.getEventsByCategory(category).stream()
-                .map(eventMapper::toEventDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(events);
-}
 }
