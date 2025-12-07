@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { getAllEvents } from '../services/api';
-import { useNavigate } from 'react-router-dom';
-import { getEventImageWithFallback } from '../utils/eventImages';
+import React, { useState, useEffect } from "react";
+import { getAllEvents } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import { getEventImageWithFallback } from "../utils/eventImages";
 
 const Home = () => {
   const [events, setEvents] = useState([]);
@@ -14,7 +14,7 @@ const Home = () => {
         const response = await getAllEvents();
         setEvents(response.data);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error("Error fetching events:", error);
       } finally {
         setLoading(false);
       }
@@ -29,14 +29,15 @@ const Home = () => {
       <div className="home">
         <h1>Upcoming Events</h1>
         <div className="events-grid">
-          {events.map(event => (
+          {events.map((event) => (
             <div key={event.id} className="event-card">
               <div className="event-image">
-                <img 
-                  src={getEventImageWithFallback(event).src} 
+                <img
+                  src={getEventImageWithFallback(event).src}
                   alt={event.title}
                   onError={(e) => {
-                    const { fallback, placeholder } = getEventImageWithFallback(event);
+                    const { fallback, placeholder } =
+                      getEventImageWithFallback(event);
                     e.target.src = fallback;
                     e.target.onerror = () => {
                       e.target.src = placeholder;
@@ -55,7 +56,7 @@ const Home = () => {
           ))}
         </div>
       </div>
-      
+
       {/* Contact Section */}
       <div className="contact-section">
         <div className="contact-container">
@@ -67,7 +68,7 @@ const Home = () => {
             </div>
             <div className="contact-item">
               <span>📞</span>
-              <span>+(91) 8445282664</span>
+              <span>+(91) 8265031972</span>
             </div>
             <div className="contact-item">
               <span>🏢</span>
