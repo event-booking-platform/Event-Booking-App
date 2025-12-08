@@ -75,8 +75,6 @@ public class BookingService {
     }
 
     private ReservationDTO performReservation(Long userId, Long eventId, Integer ticketCount) {
-        System.out.println("=== RESERVATION DEBUG START ===");
-        System.out.println("User: " + userId + ", Event: " + eventId + ", Tickets: " + ticketCount);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -84,11 +82,8 @@ public class BookingService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        System.out.println("User and Event loaded successfully");
-
         int reservedTickets = getReservedTicketsCount(eventId);
         int actuallyAvailable = event.getAvailableTickets() - reservedTickets;
-        System.out.println("Available tickets: " + actuallyAvailable);
 
         if (actuallyAvailable < ticketCount) {
             System.out.println("NOT ENOUGH TICKETS - Available: " + actuallyAvailable + ", Requested: " + ticketCount);
@@ -97,24 +92,55 @@ public class BookingService {
         }
 
         Instant expiryTime = Instant.now().plus(5, ChronoUnit.MINUTES);
-        System.out.println("Setting expiry time to (UTC): " + expiryTime);
 
         Booking reservation = new Booking(user, event, ticketCount);
         reservation.setStatus(BookingStatus.PENDING);
         reservation.setIsReserved(true);
         reservation.setReservationExpiry(expiryTime);
 
-        System.out.println("Before save - Expiry: " + reservation.getReservationExpiry());
-
         Booking savedReservation = bookingRepository.save(reservation);
 
-        System.out.println("After save - ID: " + savedReservation.getId() + ", Expiry: "
-                + savedReservation.getReservationExpiry());
-
         ReservationDTO dto = convertToReservationDTO(savedReservation);
-        System.out.println(
-                "Final DTO - Expiry: " + dto.getReservationExpiry() + ", Seconds Left: " + dto.getSecondsRemaining());
-        System.out.println("=== RESERVATION DEBUG END ===");
+        return dto;
+    }
+
+    private synchronized int getReservedTicketsCount(Long eventId) {
+        Instant now = Instant.now();
+        List<Booking> activeReservations = bookingRepository.findActiveReservationsByEventId(eventId, now);
+        return activeReservations.stream()
+                .mapToInt(Booking::getTicketCount)
+                .sum();
+    }
+
+    public ReservationDTO convertToReservationDTO(Booking reservation) {
+
+        Event event = reservation.getEvent();
+        if (event == null) {
+            event = eventRepository.findById(reservation.getEvent().getId())
+                    .orElseThrow(() -> new RuntimeException("Event not found"));
+        }
+
+        EventDTO eventDTO = eventMapper.toEventDTO(event);
+
+        ReservationDTO dto = new ReservationDTO(
+                reservation.getId(),
+                reservation.getBookingReference(),
+                reservation.getTicketCount(),
+                reservation.getTotalAmount(),
+                reservation.getReservationExpiry(),
+                eventDTO);
+
+        if (reservation.getReservationExpiry() != null) {
+            Instant now = Instant.now();
+            Instant expiry = reservation.getReservationExpiry();
+
+            long secondsRemaining = Duration.between(now, expiry).getSeconds();
+            dto.setSecondsRemaining(Math.max(0, (int) secondsRemaining));
+
+        } else {
+            System.out.println("ERROR: Reservation expiry is NULL");
+            dto.setSecondsRemaining(0);
+        }
 
         return dto;
     }
@@ -137,6 +163,30 @@ public class BookingService {
                     .filter(result -> result != null)
                     .collect(Collectors.toList());
         });
+    }
+
+    public static class ReservationRequest {
+        private Long userId;
+        private Long eventId;
+        private Integer ticketCount;
+
+        public ReservationRequest(Long userId, Long eventId, Integer ticketCount) {
+            this.userId = userId;
+            this.eventId = eventId;
+            this.ticketCount = ticketCount;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public Long getEventId() {
+            return eventId;
+        }
+
+        public Integer getTicketCount() {
+            return ticketCount;
+        }
     }
 
     @Async
@@ -242,14 +292,6 @@ public class BookingService {
         });
     }
 
-    private synchronized int getReservedTicketsCount(Long eventId) {
-        Instant now = Instant.now();
-        List<Booking> activeReservations = bookingRepository.findActiveReservationsByEventId(eventId, now);
-        return activeReservations.stream()
-                .mapToInt(Booking::getTicketCount)
-                .sum();
-    }
-
     @Scheduled(fixedRate = 60000)
     @Async
     @Transactional
@@ -271,116 +313,6 @@ public class BookingService {
                 System.out.println("Cleaned up " + expiredReservations.size() + " expired reservations");
             }
         });
-    }
-
-    public ReservationDTO convertToReservationDTO(Booking reservation) {
-        System.out.println("Converting reservation ID: " + reservation.getId());
-
-        Event event = reservation.getEvent();
-        if (event == null) {
-            System.out.println("WARNING: Event is null in reservation");
-            event = eventRepository.findById(reservation.getEvent().getId())
-                    .orElseThrow(() -> new RuntimeException("Event not found"));
-        }
-
-        EventDTO eventDTO = eventMapper.toEventDTO(event);
-
-        System.out.println("Reservation expiry in entity: " + reservation.getReservationExpiry());
-
-        ReservationDTO dto = new ReservationDTO(
-                reservation.getId(),
-                reservation.getBookingReference(),
-                reservation.getTicketCount(),
-                reservation.getTotalAmount(),
-                reservation.getReservationExpiry(),
-                eventDTO);
-
-        if (reservation.getReservationExpiry() != null) {
-            Instant now = Instant.now();
-            Instant expiry = reservation.getReservationExpiry();
-
-            long secondsRemaining = Duration.between(now, expiry).getSeconds();
-            dto.setSecondsRemaining(Math.max(0, (int) secondsRemaining));
-
-            System.out.println("Seconds remaining: " + secondsRemaining);
-            System.out.println("Current time (UTC): " + now);
-            System.out.println("Expiry time (UTC): " + expiry);
-        } else {
-            System.out.println("ERROR: Reservation expiry is NULL");
-            dto.setSecondsRemaining(0);
-        }
-
-        return dto;
-    }
-
-    public Booking createReservation(Long userId, Long eventId, Integer ticketCount) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
-
-        int reservedTickets = getReservedTicketsCount(eventId);
-        int actuallyAvailable = event.getAvailableTickets() - reservedTickets;
-
-        if (actuallyAvailable < ticketCount) {
-            throw new RuntimeException(
-                    "Not enough tickets available. Available: " + actuallyAvailable + ", Requested: " + ticketCount);
-        }
-
-        if (ticketCount <= 0) {
-            throw new RuntimeException("Ticket count must be positive");
-        }
-
-        Booking reservation = new Booking(user, event, ticketCount);
-        reservation.setStatus(BookingStatus.PENDING);
-        reservation.setIsReserved(true);
-        reservation.setReservationExpiry(Instant.now().plusSeconds(300));
-
-        return bookingRepository.save(reservation);
-    }
-
-    @Transactional
-    public Booking createBooking(Long userId, Long eventId, Integer ticketCount) {
-        Lock eventLock = eventLocks.computeIfAbsent(eventId, k -> new ReentrantLock());
-
-        try {
-            if (eventLock.tryLock(5, java.util.concurrent.TimeUnit.SECONDS)) {
-                try {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("User not found"));
-
-                    Event event = eventRepository.findById(eventId)
-                            .orElseThrow(() -> new RuntimeException("Event not found"));
-
-                    if (event.getAvailableTickets() < ticketCount) {
-                        throw new RuntimeException("Not enough tickets available. Available: "
-                                + event.getAvailableTickets() + ", Requested: " + ticketCount);
-                    }
-
-                    if (ticketCount <= 0) {
-                        throw new RuntimeException("Ticket count must be positive");
-                    }
-
-                    Booking booking = new Booking(user, event, ticketCount);
-                    booking.setStatus(BookingStatus.CONFIRMED);
-                    booking.setIsReserved(false);
-                    Booking savedBooking = bookingRepository.save(booking);
-
-                    event.setAvailableTickets(event.getAvailableTickets() - ticketCount);
-                    eventRepository.save(event);
-
-                    return savedBooking;
-                } finally {
-                    eventLock.unlock();
-                }
-            } else {
-                throw new RuntimeException("System busy. Please try again.");
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Booking interrupted. Please try again.");
-        }
     }
 
     @Transactional(readOnly = true)
@@ -437,30 +369,6 @@ public class BookingService {
         return bookings.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-    }
-
-    public static class ReservationRequest {
-        private Long userId;
-        private Long eventId;
-        private Integer ticketCount;
-
-        public ReservationRequest(Long userId, Long eventId, Integer ticketCount) {
-            this.userId = userId;
-            this.eventId = eventId;
-            this.ticketCount = ticketCount;
-        }
-
-        public Long getUserId() {
-            return userId;
-        }
-
-        public Long getEventId() {
-            return eventId;
-        }
-
-        public Integer getTicketCount() {
-            return ticketCount;
-        }
     }
 
     @Scheduled(fixedRate = 300000)

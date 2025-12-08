@@ -14,7 +14,7 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Version
     private Long version;
 
@@ -58,10 +58,11 @@ public class Event {
     }
 
     // Constructors
-    public Event() {}
+    public Event() {
+    }
 
     public Event(String title, String description, LocalDate eventDate, LocalTime eventTime,
-                 String venue, BigDecimal ticketPrice, Integer availableTickets, String category) {
+            String venue, BigDecimal ticketPrice, Integer availableTickets, String category) {
         this.title = title;
         this.description = description;
         this.eventDate = eventDate;
@@ -73,39 +74,99 @@ public class Event {
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getTitle() {
+        return title;
+    }
 
-    public LocalDate getEventDate() { return eventDate; }
-    public void setEventDate(LocalDate eventDate) { this.eventDate = eventDate; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public LocalTime getEventTime() { return eventTime; }
-    public void setEventTime(LocalTime eventTime) { this.eventTime = eventTime; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getVenue() { return venue; }
-    public void setVenue(String venue) { this.venue = venue; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public BigDecimal getTicketPrice() { return ticketPrice; }
-    public void setTicketPrice(BigDecimal ticketPrice) { this.ticketPrice = ticketPrice; }
+    public LocalDate getEventDate() {
+        return eventDate;
+    }
 
-    public Integer getAvailableTickets() { return availableTickets; }
-    public void setAvailableTickets(Integer availableTickets) { this.availableTickets = availableTickets; }
+    public void setEventDate(LocalDate eventDate) {
+        this.eventDate = eventDate;
+    }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public LocalTime getEventTime() {
+        return eventTime;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setEventTime(LocalTime eventTime) {
+        this.eventTime = eventTime;
+    }
 
-    public List<Booking> getBookings() { return bookings; }
-    public void setBookings(List<Booking> bookings) { this.bookings=bookings;}
+    public String getVenue() {
+        return venue;
+    }
 
-    public Long getVersion() { return version; }
-    public void setVersion(Long version) { this.version = version; }
+    public void setVenue(String venue) {
+        this.venue = venue;
+    }
+
+    public BigDecimal getTicketPrice() {
+        return ticketPrice;
+    }
+
+    public void setTicketPrice(BigDecimal ticketPrice) {
+        this.ticketPrice = ticketPrice;
+    }
+
+    public Integer getAvailableTickets() {
+        return availableTickets;
+    }
+
+    public void setAvailableTickets(Integer availableTickets) {
+        this.availableTickets = availableTickets;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }

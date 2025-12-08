@@ -61,10 +61,4 @@ public class UserService {
         return userDTO;
     }
 
-    public User promoteToAdmin(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setRole(UserRole.ROLE_ADMIN);
-        return userRepository.save(user);
-    }
 }
